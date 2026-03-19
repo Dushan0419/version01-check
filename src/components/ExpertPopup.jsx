@@ -6,9 +6,6 @@ const ExpertPopup = ({ open, onClose, preSelectedService }) => {
   const [selectedService, setSelectedService] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [responseMessage, setResponseMessage] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
-
   const [formData, setFormData] = useState({
     name: "",
     company: "",
@@ -35,27 +32,14 @@ const ExpertPopup = ({ open, onClose, preSelectedService }) => {
     });
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      company: "",
-      phone: "",
-      email: "",
-      project: ""
-    });
-    setSelectedService("");
-    setBudget(5000);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setResponseMessage("");
 
     const data = {
       ...formData,
       service: selectedService,
-      budget: Number(budget) // ✅ ensure number
+      budget: budget
     };
 
     try {
@@ -67,32 +51,23 @@ const ExpertPopup = ({ open, onClose, preSelectedService }) => {
         body: JSON.stringify(data)
       });
 
-      // 👇 optional debug (you can remove later)
-      const result = await res.text();
-      console.log("API response:", result);
-
       if (res.ok) {
-        setResponseMessage("Message sent successfully!");
-        setIsSuccess(true);
-
-        // ✅ only reset on success
-        resetForm();
-
-        // ✅ close after delay
-        setTimeout(() => {
-          setResponseMessage("");
-          onClose();
-        }, 2500);
-
+        alert("Message sent successfully!");
+        onClose();
+        setFormData({
+          name: "",
+          company: "",
+          phone: "",
+          email: "",
+          project: ""
+        });
+        setSelectedService("");
+        setBudget(5000);
       } else {
-        setResponseMessage("Error sending message. Please try again.");
-        setIsSuccess(false);
+        alert("Error sending message");
       }
-
     } catch (error) {
-      console.error(error);
-      setResponseMessage("Server error. Please try later.");
-      setIsSuccess(false);
+      alert("Server error");
     }
 
     setIsSubmitting(false);
@@ -106,10 +81,8 @@ const ExpertPopup = ({ open, onClose, preSelectedService }) => {
   return (
     <div className="popup-overlay" onClick={onClose}>
       <div className="popup-container" onClick={(e) => e.stopPropagation()}>
-
         <button className="popup-close" onClick={onClose}>×</button>
 
-        {/* LEFT */}
         <div className="popup-left">
           <div className="popup-left-top">
             <h3>Speak to Our Experts</h3>
@@ -139,21 +112,11 @@ const ExpertPopup = ({ open, onClose, preSelectedService }) => {
           </div>
         </div>
 
-        {/* RIGHT */}
         <div className="popup-right">
-
           <h2>Let's Build Something Incredible Together</h2>
-
           <p className="popup-subtext">
             Tell us what you're looking for and our experts will get back to you.
           </p>
-
-          {/* ALERT */}
-          {responseMessage && (
-            <div className={`alert ${isSuccess ? "alert-success" : "alert-error"}`}>
-              {responseMessage}
-            </div>
-          )}
 
           <form className="popup-form" onSubmit={handleSubmit}>
 
@@ -216,7 +179,7 @@ const ExpertPopup = ({ open, onClose, preSelectedService }) => {
               min="5000"
               max="65000"
               value={budget}
-              onChange={(e) => setBudget(Number(e.target.value))} // ✅ fix
+              onChange={(e) => setBudget(e.target.value)}
               style={{ background: sliderBackground }}
             />
 
@@ -229,24 +192,13 @@ const ExpertPopup = ({ open, onClose, preSelectedService }) => {
             />
 
             <div className="popup-actions">
-
-              <button
-                type="button"
-                className="cancel-btn"
-                onClick={onClose}
-                disabled={isSubmitting}
-              >
+              <button type="button" className="cancel-btn" onClick={onClose}>
                 Cancel
               </button>
 
-              <button
-                type="submit"
-                className="submit-btn"
-                disabled={isSubmitting}
-              >
+              <button type="submit" className="submit-btn">
                 {isSubmitting ? "SENDING..." : "Submit"}
               </button>
-
             </div>
 
           </form>
